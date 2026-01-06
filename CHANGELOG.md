@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/PetroVoronov/telegram-forward-user-bot/compare/v1.7.0...v1.7.1) (2026-01-06)
+
+
+### Bug Fixes
+
+* update API calls to use messages.GetForumTopics instead of channels.GetForumTopics ([52e9a55](https://github.com/PetroVoronov/telegram-forward-user-bot/commit/52e9a55351395018d623b02addad7630023fb484))
+
 ## [1.7.0](https://github.com/PetroVoronov/telegram-forward-user-bot/compare/v1.6.13...v1.7.0) (2026-01-06)
 
 ### Bug Fixes
