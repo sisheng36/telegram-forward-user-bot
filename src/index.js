@@ -9,7 +9,7 @@ const {menuDefaults, MenuItemRoot} = require('telegram-menu-from-structure');
 const {Cache} = require('./modules/cache/Cache');
 const {Command} = require('commander');
 const {setTimeout} = require('node:timers');
-const {securedLogger: log} = require('./modules/logging/logging');
+const {securedLogger: log, SecuredLogger} = require('./modules/logging/logging');
 const {NewMessage, NewMessageEvent} = require('teleproto/events');
 const {EditedMessage} = require('teleproto/events/EditedMessage');
 const {CallbackQuery, CallbackQueryEvent} = require('teleproto/events/CallbackQuery');
@@ -36,6 +36,7 @@ program
   .option('-s, --resubscribe-interval <minutes>', 'Resubscribe on changes in source chats, in minutes', resubscribeIntervalDefault)
   .option('-b, --no-bot', 'Start without the bot instance')
   .option('-d, --debug', 'Debug level of logging', false)
+  .option('--plain-logs', 'Disable ANSI color codes in log output')
   .option('--no-debug-menu', 'Disable debug level of logging for the Menu instance')
   .option('--no-debug-cache', 'Disable debug level of logging for the Cache instance')
   .option('--debug-client-user', 'Debug level of logging for the client "user" instance', false)
@@ -54,6 +55,7 @@ const options = {
   resubscribeInterval: toNumber(parsedOptions.resubscribeInterval, resubscribeIntervalDefault),
   noBot: parsedOptions.bot === false,
   debug: Boolean(parsedOptions.debug),
+  plainLogs: Boolean(parsedOptions.plainLogs),
   noDebugMenu: parsedOptions.debugMenu === false,
   noDebugCache: parsedOptions.debugCache === false,
   debugClientUser: Boolean(parsedOptions.debugClientUser),
@@ -64,6 +66,10 @@ const options = {
 
 if (options.debug) {
   log.setLevel('debug');
+}
+
+if (options.plainLogs) {
+  log.setColorsEnabled(false);
 }
 
 log.appendMaskWord('apiId', 'apiHash', 'DeviceSN', 'ClientId', 'phone');
@@ -1146,18 +1152,28 @@ menuRoot
     } else {
       getAPIAttributes().then(() => {
         if (typeof apiId === 'number' && apiId !== 0 && typeof apiHash === 'string' && apiHash !== '') {
+          clientLogger = new SecuredLogger('info');
+          if (options.plainLogs) {
+            clientLogger.setColorsEnabled(false);
+          }
           clientAsUser = new TelegramClient(storeSession, apiId, apiHash, {
             connectionRetries: Infinity,
             autoReconnect: true,
             appVersion: scriptVersion,
+            baseLogger: clientLogger,
           });
           clientAsUser.setParseMode('html');
           if (options.debugClientUser === true) clientAsUser.setLogLevel('debug');
           if (options.noBot !== true) {
+            botLogger = new SecuredLogger('info');
+            if (options.plainLogs) {
+              botLogger.setColorsEnabled(false);
+            }
             clientAsBot = new TelegramClient(new StringSession(''), apiId, apiHash, {
               connectionRetries: Infinity,
               autoReconnect: true,
               appVersion: scriptVersion,
+              baseLogger: botLogger,
             });
             clientAsBot.setParseMode('html');
             if (options.debugClientBot === true) clientAsBot.setLogLevel('debug');

@@ -3,6 +3,7 @@ class SecuredLogger extends Logger {
   constructor(...args) {
     super(...args);
     this.maskCharactersVisible = 3;
+    this.colorsEnabled = true;
   }
   maskWords = [
     'token',
@@ -21,10 +22,10 @@ class SecuredLogger extends Logger {
     'bearer',
   ];
 
-  _log(level, message, color) {
+  _log(level, message) {
     if (this.canSend(level)) {
       if (typeof message === 'string') {
-        super._log(level, message, color);
+        super._log(level, message);
       } else if (Array.isArray(message)) {
         let isBot;
         if (
@@ -41,8 +42,20 @@ class SecuredLogger extends Logger {
         } else if (isBot === false) {
           messageText = `User] [${messageText}`;
         }
-        super._log(level, messageText, color);
+        super._log(level, messageText);
       }
+    }
+  }
+
+  setColorsEnabled(value) {
+    this.colorsEnabled = value !== false;
+  }
+
+  log(level, message) {
+    if (this.colorsEnabled) {
+      super.log(level, message);
+    } else {
+      console.log(this.format(message, level));
     }
   }
 
@@ -143,4 +156,5 @@ class SecuredLogger extends Logger {
 
 const securedLogger = new SecuredLogger('info');
 
+exports.SecuredLogger = SecuredLogger;
 exports.securedLogger = securedLogger;
