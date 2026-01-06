@@ -418,12 +418,12 @@ const topicIdPresence = (item, path) => {
         } else {
           clientAsUser
             .invoke(
-              new Api.channels.GetForumTopics({
+              new Api.messages.GetForumTopics({
                 channel: entity,
                 limit: 100,
                 offsetId: 0,
                 offsetDate: 0,
-                addOffset: 0,
+                offsetTopic: 0,
               }),
             )
             .then((result) => {
@@ -1327,12 +1327,12 @@ async function refreshDialogs() {
           if (rule[key].topicId !== null && rule[key].topicId !== undefined) {
             if (item.entity?.forum === true) {
               const forum = await clientAsUser.invoke(
-                new Api.channels.GetForumTopics({
+                new Api.messages.GetForumTopics({
                   channel: item.entity,
                   limit: 100,
                   offsetId: 0,
                   offsetDate: 0,
-                  addOffset: 0,
+                  offsetTopic: 0,
                 }),
               );
               if (Array.isArray(forum.topics) && forum.topics.length > 0) {
