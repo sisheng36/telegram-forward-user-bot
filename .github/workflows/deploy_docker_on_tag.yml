@@ -1,4 +1,5 @@
-name: Build docker image and push to Docker Hub and to GitHub Container Registry
+# 20260521 14:21:50 || name: Build docker image and push to GitHub Container Registry (仅GHCR)
+name: Build docker image and push to GitHub Container Registry
 
 on:
   workflow_dispatch:
@@ -35,14 +36,7 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3
 
-      -
-        name: Login to Docker Hub
-        id: login_dockerhub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
+      # 已删除：Docker Hub登录步骤
       -
         name: Login to GitHub Container Registry
         id: login_github
@@ -57,8 +51,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
+          # 已删除：Docker Hub镜像地址，仅保留GHCR
           images: |
-            ${{ env.IMAGE_NAME }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=semver,pattern={{version}}
@@ -81,18 +75,12 @@ jobs:
 
       -
         name: Prepare image URLs
-        id:  prepare_urls
+        id: prepare_urls
         run: |
           sed -i -e "s|docs/images/|https://raw.githubusercontent.com/${IMAGE_NAME}/refs/heads/main/docs/images/|g" README.md
 
-      -
-        name: Update repo description
-        uses: peter-evans/dockerhub-description@v4
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: ${{ env.IMAGE_NAME }}
-
+      # 已删除：Docker Hub仓库描述更新步骤
+      # 保留原有的制品证明生成（注释状态不变）
 #      -
 #        name: Generate artifact attestation
 #        uses: actions/attest-build-provenance@v1
